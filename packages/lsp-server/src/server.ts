@@ -34,7 +34,7 @@ export function createServer(): Connection {
   let settings: ServerSettings = {
     dialect: 'standard',
     maxFileSize: 1024 * 1024, // 1MB
-    logLevel: 'info',
+    logLevel: 'debug',
   };
 
   connection.onInitialize((params: InitializeParams): InitializeResult => {

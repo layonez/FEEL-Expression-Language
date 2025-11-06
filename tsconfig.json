@@ -12,13 +12,6 @@
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "composite": true,
-    "incremental": true
-  },
-  "files": [],
-  "references": [
-    { "path": "./packages/core" },
-    { "path": "./packages/lsp-server" }
-  ]
+    "sourceMap": true
+  }
 }

@@ -1,0 +1,42 @@
+// Example FEEL expressions for testing
+
+// Basic arithmetic
+1 + 2 * 3
+
+// String functions
+upper case("hello world")
+substring("testing", 1, 4)
+string length("hello")
+
+// List operations
+sum([1, 2, 3, 4, 5])
+count([10, 20, 30])
+min([5, 2, 8, 1])
+max([5, 2, 8, 1])
+
+// Broken conditional to test diagnostics
+if and else 12
+
+// Date/Time
+date("2024-11-06")
+time("14:30:00", sdf1f+ds)
+
+date and time("2024-11-06T14:30:00Z")
+duration("P2 Y4M")
+
+// Boolean operations
+all([true, true, false])
+any([true, false, false])
+
+// Conditionals
+if 10 > 5 then "yes" else "no"
+
+// Context
+{
+  name: "John",
+  age: 30,
+  active: true
+}
+
+// Invalid syntax to test diagnostics
+this is not valid FEEL syntax
