@@ -79,7 +79,7 @@ The server will listen on `localhost:7345` by default.
 ### LSP Server (Fully Implemented)
 
 - ✅ **Diagnostics**: Syntax error detection from `lezer-feel` parser
-- ✅ **Hover**: Documentation for 43 FEEL built-in functions
+- ✅ **Hover**: Documentation for 80+ FEEL built-in functions (73 unique names)
 - ✅ **Completion**: Keywords and built-in functions with signatures
 - ✅ **Semantic Tokens**: Syntax highlighting via LSP
 - ✅ **TCP & stdio modes**: Connect via standard I/O or TCP socket
@@ -121,6 +121,9 @@ pnpm dev
 
 # Clean build artifacts
 pnpm clean
+
+# Update FEEL built-in functions from Apache KIE spec
+pnpm update-builtins
 ```
 
 ### Package Structure
@@ -157,15 +160,33 @@ packages/
 This project leverages the FEEL ecosystem packages to minimize custom code:
 
 - **Parser**: Uses `lezer-feel` directly with diagnostic extraction pattern from `feel-playground`
-- **Built-ins**: Maintains custom metadata with rich descriptions for LSP hover (not available in `feelin`)
+- **Built-ins**: Auto-generated from Apache KIE Drools spec with rich descriptions for LSP hover (not available in `feelin`)
 - **Minimal Wrappers**: Thin abstractions over library APIs for LSP integration
 
-See `packages/core/src/builtins.ts` for rationale on custom built-in function metadata.
+The built-in functions are automatically generated from the official Apache KIE Drools specification.
+
+## Updating Built-in Functions
+
+The FEEL built-in functions are auto-generated from the official Apache KIE Drools specification:
+
+```bash
+pnpm update-builtins  # Fetches and regenerates from spec
+pnpm build            # Rebuild after updating
+```
+
+The `update-builtins` script automatically:
+- Fetches latest function definitions from [Apache KIE Drools](https://github.com/apache/incubator-kie-drools/blob/main/kie-dmn/kie-dmn-feel/ref-dmn-feel-builtin-functions.adoc)
+- Parses 80+ FEEL built-in functions (73 unique names) from DMN 1.3 spec
+- Generates TypeScript metadata with descriptions for LSP features (hover, completion)
+- Validates the output compiles correctly
+
+The generated `packages/core/src/builtins.ts` file includes clear auto-generated warnings and should not be edited manually.
 
 ## References
 
 - [DMN 1.3 Specification](https://www.omg.org/spec/DMN/)
 - [FEEL Specification](https://www.omg.org/spec/DMN/1.3/)
+- [Apache KIE Drools FEEL Reference](https://github.com/apache/incubator-kie-drools/blob/main/kie-dmn/kie-dmn-feel/ref-dmn-feel-builtin-functions.adoc)
 - [LSP Specification](https://microsoft.github.io/language-server-protocol/)
 - [lezer-feel](https://www.npmjs.com/package/lezer-feel)
 - [feelin](https://www.npmjs.com/package/feelin)

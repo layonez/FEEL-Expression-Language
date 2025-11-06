@@ -9,7 +9,8 @@
     "dev": "pnpm -r --parallel dev",
     "clean": "pnpm -r clean",
     "lsp:start": "pnpm --filter @feel/lsp-server start",
-    "lsp:start:tcp": "pnpm --filter @feel/lsp-server start:tcp"
+    "lsp:start:tcp": "pnpm --filter @feel/lsp-server start:tcp",
+    "update-builtins": "tsx scripts/update-builtins.ts"
   },
   "repository": {
     "type": "git",
