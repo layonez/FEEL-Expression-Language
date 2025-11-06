@@ -79,6 +79,9 @@ importers:
 
   packages/vscode-extension:
     dependencies:
+      '@feel/lsp-server':
+        specifier: workspace:*
+        version: link:../lsp-server
       vscode-languageclient:
         specifier: ^9.0.1
         version: 9.0.1

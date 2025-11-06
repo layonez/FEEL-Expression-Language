@@ -1,0 +1,41 @@
+{
+  modelJson: httpCall(
+    method: "GET",
+    endpoint: "spm:///p/model/" + modelId + "/json",
+    headers: {
+      "Cache-Control": "no-cache",
+      "Authorization": "FromConfig authEmail"
+    },
+    body: null,
+    config: {
+      expectSuccess: true
+    }
+  ),
+
+  mgCheckResult: httpCall(
+    method: "POST",
+    endpoint: "spm:///p/mgeditorchecker",
+    headers: {
+      "Cache-Control": "no-cache",
+      "Authorization": "FromConfig authEmail",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: {
+      id: modelId,
+      guidelineId: guidelineGUID,
+      model_json: modelJson.body,
+      comments: "{}",
+      checkLinking: false
+    },
+    config: sum([1,2])
+  ),
+  isTrue: date(
+                  date and time("2012-12-25T11:00:00Z")
+                ) = date("2012-12-25"),
+
+  resultRep: parseJson(json: mgCheckResult.body).rep[guidelineId = guidelineGUID][1],
+  numberOfInfos: if resultRep.info != null then count(get entries(resultRep.info)) else 0,
+  numberOfWarnings: if resultRep.should != null then count(get entries(resultRep.should)) else 0,
+  numberOfMusts: if resultRep.must != null then count(get entries(resultRep.must)) else 0,
+  guidelineCheckError: numberOfMusts > 0
+}

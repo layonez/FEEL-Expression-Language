@@ -1,0 +1,14 @@
+.vscode/**
+.vscode-test/**
+src/**
+syntaxes/**
+icons/**
+.gitignore
+.prettierrc
+.eslintrc.json
+**/*.ts
+**/tsconfig.json
+**/tsup.config.ts
+*.tsbuildinfo
+# Include dist but exclude source maps for production
+dist/**/*.map

@@ -1,0 +1,85 @@
+{
+  "name": "vscode-feel",
+  "displayName": "FEEL Language Support",
+  "description": "Language support for FEEL (Friendly Enough Expression Language)",
+  "version": "0.0.1",
+  "publisher": "feel",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "feel",
+    "dmn",
+    "decision"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:feel"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "feel",
+        "aliases": [
+          "FEEL",
+          "feel"
+        ],
+        "extensions": [
+          ".feel"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "FEEL",
+      "properties": {
+        "feel.server.path": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the FEEL language server executable. If empty, uses the bundled server."
+        },
+        "feel.server.maxFileSize": {
+          "type": "number",
+          "default": 1048576,
+          "description": "Maximum file size (in bytes) that the server will process."
+        },
+        "feel.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the language server."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "pnpm run build:server && pnpm run build:extension && pnpm run bundle:server",
+    "build:server": "cd ../lsp-server && pnpm build",
+    "build:extension": "tsup",
+    "bundle:server": "mkdir -p dist/server && cp -r ../lsp-server/dist/* dist/server/ && cp ../lsp-server/package.json dist/server/ && cd dist/server && npm install --omit=dev --no-package-lock",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "vscode:prepublish": "pnpm build",
+    "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1",
+    "@feel/lsp-server": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "^5.6.0",
+    "tsup": "^8.3.0"
+  }
+}
