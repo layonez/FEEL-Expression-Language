@@ -1,0 +1,22 @@
+<svg
+  version="1.1"
+  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 5" width="200">
+  <defs>
+    <clipPath id="round-corners">
+      <rect x="0" y="0" width="100" height="5" rx="1" />
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#round-corners)">
+    <rect width="81.8314661471018" height="5" fill="rgb(26, 127, 55)" x="0" y="0">
+      <title>1680 tests passing</title>
+    </rect>
+    <rect width="13.151485630784219" height="5" fill="rgb(200, 200, 200)" x="81.8314661471018" y="0">
+      <title>270 tests pending</title>
+    </rect>
+    <rect width="5.01704822211398" height="5" fill="rgb(209, 36, 47)" x="94.98295177788603" y="0">
+      <title>103 tests failing</title>
+    </rect>
+  </g>
+
+</svg>

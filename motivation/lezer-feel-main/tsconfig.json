@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": [
+      "ES2018"
+    ],
+    "checkJs": true,
+    "strict": true,
+    "noImplicitAny": false,
+  },
+  "include": [
+    "src",
+    "test"
+  ]
+}

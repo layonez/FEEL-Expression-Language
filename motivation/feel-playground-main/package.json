@@ -1,0 +1,41 @@
+{
+  "name": "feel-playground",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "all": "run-s lint build",
+    "build": "rollup -c",
+    "dev": "npm run build -- -w",
+    "start": "sirv public",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@codemirror/autocomplete": "^6.18.4",
+    "@codemirror/commands": "^6.9.0",
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/language": "^6.10.8",
+    "@codemirror/lint": "^6.9.0",
+    "@codemirror/search": "^6.5.11",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.38.4",
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-terser": "^0.4.4",
+    "eslint": "^9.36.0",
+    "eslint-plugin-bpmn-io": "^2.2.0",
+    "eslint-plugin-svelte": "^3.12.4",
+    "feelin": "^4.5.0",
+    "lang-feel": "^2.4.0",
+    "lezer-feel": "^1.9.0",
+    "min-dash": "^4.2.3",
+    "npm-run-all2": "^8.0.4",
+    "opener": "^1.5.2",
+    "rollup": "^4.52.4",
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-css-only": "^4.5.5",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-svelte": "^7.2.3",
+    "sirv-cli": "^3.0.0",
+    "svelte": "^4.2.19"
+  }
+}

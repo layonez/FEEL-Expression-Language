@@ -1,0 +1,31 @@
+{
+  "name": "@feel/lsp-server",
+  "version": "0.0.1",
+  "description": "Language Server Protocol server for FEEL",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "feel-lsp": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "start": "node dist/cli.js --stdio",
+    "start:tcp": "node dist/cli.js --tcp :7345"
+  },
+  "dependencies": {
+    "@feel/core": "workspace:*",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.6.0",
+    "tsup": "^8.3.0"
+  }
+}

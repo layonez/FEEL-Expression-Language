@@ -1,0 +1,42 @@
+{
+  "name": "feel-expression-language",
+  "version": "0.0.1",
+  "description": "FEEL language tooling across IDEs with a single, reusable parser/validator core",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm -r --parallel dev",
+    "clean": "pnpm -r clean",
+    "lsp:start": "pnpm --filter @feel/lsp-server start",
+    "lsp:start:tcp": "pnpm --filter @feel/lsp-server start:tcp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/layonez/FEEL-Expression-Language.git"
+  },
+  "keywords": [
+    "feel",
+    "lsp",
+    "language-server"
+  ],
+  "author": "layonez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/layonez/FEEL-Expression-Language/issues"
+  },
+  "homepage": "https://github.com/layonez/FEEL-Expression-Language#readme",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.6.0",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.0",
+    "eslint": "^9.14.0",
+    "prettier": "^3.3.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.0.0"
+}

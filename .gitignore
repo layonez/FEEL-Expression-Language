@@ -1,7 +1,31 @@
-.DS_Store
-.gradle
-.idea
-.intellijPlatform
-.kotlin
-.qodana
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
 build
+*.tsbuildinfo
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs
+
+# Temp
+tmp
+temp
+.cache
+
+# Test coverage
+coverage
+.nyc_output
