@@ -8,6 +8,10 @@ import {
   Connection,
   Hover,
   MarkupKind,
+  CompletionItem,
+  CompletionItemKind,
+  SemanticTokensBuilder,
+  SemanticTokensLegend,
 } from 'vscode-languageserver/node.js';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { parse, getBuiltInFunction, getBuiltInFunctionNames } from '@feel/core';
@@ -20,6 +24,42 @@ interface ServerSettings {
   maxFileSize?: number;
   logLevel?: 'error' | 'warn' | 'info' | 'debug';
 }
+
+/**
+ * Semantic token types and modifiers
+ */
+const tokenTypes = ['keyword', 'function', 'number', 'string', 'comment', 'operator'];
+const tokenModifiers: string[] = [];
+
+const tokenLegend: SemanticTokensLegend = {
+  tokenTypes,
+  tokenModifiers,
+};
+
+/**
+ * FEEL keywords for completion
+ */
+const keywords = [
+  'if',
+  'then',
+  'else',
+  'for',
+  'in',
+  'return',
+  'some',
+  'every',
+  'satisfies',
+  'function',
+  'true',
+  'false',
+  'null',
+  'not',
+  'and',
+  'or',
+  'between',
+  'instance',
+  'of',
+];
 
 /**
  * Creates and starts the FEEL LSP server
@@ -37,13 +77,20 @@ export function createServer(): Connection {
     logLevel: 'debug',
   };
 
-  connection.onInitialize((params: InitializeParams): InitializeResult => {
+  connection.onInitialize((_params: InitializeParams): InitializeResult => {
     connection.console.log('FEEL LSP Server initializing...');
 
     return {
       capabilities: {
         textDocumentSync: TextDocumentSyncKind.Incremental,
         hoverProvider: true,
+        completionProvider: {
+          triggerCharacters: [' ', '(', '[', '{'],
+        },
+        semanticTokensProvider: {
+          legend: tokenLegend,
+          full: true,
+        },
       },
     };
   });
@@ -173,11 +220,124 @@ export function createServer(): Connection {
     return null;
   });
 
+  /**
+   * Completion provider - provides keyword and built-in function completions
+   */
+  connection.onCompletion((_params): CompletionItem[] => {
+    const completions: CompletionItem[] = [];
+
+    // Add keyword completions
+    keywords.forEach((keyword) => {
+      completions.push({
+        label: keyword,
+        kind: CompletionItemKind.Keyword,
+        detail: 'FEEL keyword',
+      });
+    });
+
+    // Add built-in function completions
+    const builtInNames = getBuiltInFunctionNames();
+    builtInNames.forEach((name) => {
+      const fn = getBuiltInFunction(name);
+      if (fn) {
+        completions.push({
+          label: name,
+          kind: CompletionItemKind.Function,
+          detail: fn.signature,
+          documentation: {
+            kind: MarkupKind.Markdown,
+            value: fn.description,
+          },
+        });
+      }
+    });
+
+    return completions;
+  });
+
+  /**
+   * Completion item resolve - provides additional details for completion items
+   */
+  connection.onCompletionResolve((item): CompletionItem => {
+    // Can add more details here if needed
+    return item;
+  });
+
+  /**
+   * Semantic tokens provider - provides syntax highlighting
+   */
+  connection.languages.semanticTokens.on((params) => {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      return { data: [] };
+    }
+
+    const text = document.getText();
+    const builder = new SemanticTokensBuilder();
+
+    // Simple token detection using regex
+    // Keywords
+    const keywordPattern = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+    let match;
+    while ((match = keywordPattern.exec(text)) !== null) {
+      const pos = document.positionAt(match.index);
+      builder.push(pos.line, pos.character, match[0].length, tokenTypes.indexOf('keyword'), 0);
+    }
+
+    // Built-in functions
+    const builtInNames = getBuiltInFunctionNames();
+    const functionPattern = new RegExp(`\\b(${builtInNames.map(escapeRegex).join('|')})\\b`, 'g');
+    while ((match = functionPattern.exec(text)) !== null) {
+      const pos = document.positionAt(match.index);
+      builder.push(pos.line, pos.character, match[0].length, tokenTypes.indexOf('function'), 0);
+    }
+
+    // Numbers
+    const numberPattern = /\b\d+(\.\d+)?([eE][+-]?\d+)?\b/g;
+    while ((match = numberPattern.exec(text)) !== null) {
+      const pos = document.positionAt(match.index);
+      builder.push(pos.line, pos.character, match[0].length, tokenTypes.indexOf('number'), 0);
+    }
+
+    // Strings
+    const stringPattern = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g;
+    while ((match = stringPattern.exec(text)) !== null) {
+      const pos = document.positionAt(match.index);
+      builder.push(pos.line, pos.character, match[0].length, tokenTypes.indexOf('string'), 0);
+    }
+
+    // Comments
+    const lineCommentPattern = /\/\/.*/g;
+    while ((match = lineCommentPattern.exec(text)) !== null) {
+      const pos = document.positionAt(match.index);
+      builder.push(pos.line, pos.character, match[0].length, tokenTypes.indexOf('comment'), 0);
+    }
+
+    const blockCommentPattern = /\/\*[\s\S]*?\*\//g;
+    while ((match = blockCommentPattern.exec(text)) !== null) {
+      const pos = document.positionAt(match.index);
+      const lines = match[0].split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        const linePos = { line: pos.line + i, character: i === 0 ? pos.character : 0 };
+        builder.push(linePos.line, linePos.character, lines[i].length, tokenTypes.indexOf('comment'), 0);
+      }
+    }
+
+    return builder.build();
+  });
+
   // Listen on the connection
   documents.listen(connection);
   connection.listen();
 
   return connection;
+}
+
+/**
+ * Escape special regex characters
+ */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**

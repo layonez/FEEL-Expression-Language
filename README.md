@@ -76,18 +76,37 @@ The server will listen on `localhost:7345` by default.
 
 ## MVP Features
 
-Currently implemented:
+### LSP Server (Fully Implemented)
 
 - ✅ **Diagnostics**: Syntax error detection from `lezer-feel` parser
-- ✅ **Hover**: Documentation for FEEL built-in functions
+- ✅ **Hover**: Documentation for 43 FEEL built-in functions
+- ✅ **Completion**: Keywords and built-in functions with signatures
+- ✅ **Semantic Tokens**: Syntax highlighting via LSP
 - ✅ **TCP & stdio modes**: Connect via standard I/O or TCP socket
 
-Coming soon (not yet implemented):
+### IDE Clients
 
-- ⏳ Code completion for keywords and built-in functions
-- ⏳ Semantic tokens for enhanced syntax highlighting
-- ⏳ VS Code extension
-- ⏳ IntelliJ plugin with bundled server
+- ✅ **VS Code Extension**: Lean wrapper (~90 LOC) that spawns LSP server
+- ⏳ **IntelliJ Plugin**: Placeholder (use manual LSP config for now)
+
+## Testing with VS Code
+
+1. **Build and open extension:**
+   ```bash
+   pnpm build
+   code packages/vscode-extension
+   ```
+
+2. **Launch Extension Development Host:**
+   - Press `F5` in VS Code
+   - Opens new window with extension activated
+
+3. **Test features:**
+   - Open `examples/01-basic-types.feel`
+   - See syntax highlighting via semantic tokens
+   - Hover over `sum`, `date`, `substring` for docs
+   - Type `Ctrl+Space` for completions
+   - See diagnostics on syntax errors
 
 ## Development
 
@@ -132,6 +151,16 @@ packages/
 - **LSP**: `vscode-languageserver@9.0.1`
 - **Build**: `tsup`, `pnpm workspaces`
 - **Language**: TypeScript, ES2022, ESM
+
+## Design Philosophy
+
+This project leverages the FEEL ecosystem packages to minimize custom code:
+
+- **Parser**: Uses `lezer-feel` directly with diagnostic extraction pattern from `feel-playground`
+- **Built-ins**: Maintains custom metadata with rich descriptions for LSP hover (not available in `feelin`)
+- **Minimal Wrappers**: Thin abstractions over library APIs for LSP integration
+
+See `packages/core/src/builtins.ts` for rationale on custom built-in function metadata.
 
 ## References
 

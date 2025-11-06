@@ -3,6 +3,13 @@ import { BuiltInFunction } from './types.js';
 /**
  * Metadata for FEEL built-in functions
  * Based on DMN 1.3 specification
+ *
+ * Note: While the `feelin` library contains the actual built-in function
+ * implementations, it does not export metadata with descriptions suitable
+ * for LSP hover information. This file provides rich documentation for
+ * each built-in function to enhance the developer experience.
+ *
+ * Reference: https://github.com/nikku/feelin/blob/main/src/builtins.ts
  */
 export const builtInFunctions: BuiltInFunction[] = [
   {
