@@ -1,6 +1,7 @@
 import { parser } from 'lezer-feel';
-import { SyntaxNode } from '@lezer/common';
+import { SyntaxNode, Tree } from '@lezer/common';
 import { Diagnostic, DiagnosticSeverity, ParseResult, Position } from './types.js';
+import { getBuiltInFunction } from './builtins.js';
 
 /**
  * Parses FEEL expression and returns parse tree with diagnostics
@@ -28,6 +29,10 @@ export function parse(input: string): ParseResult {
       source: 'feel-parser',
     });
   });
+
+  // Add semantic validation for function calls
+  const semanticDiagnostics = validateFunctions(tree, input);
+  diagnostics.push(...semanticDiagnostics);
 
   return { tree, diagnostics };
 }
@@ -112,4 +117,70 @@ export function positionToOffset(text: string, position: Position): number {
 
   offset += Math.min(position.character, lines[position.line]?.length || 0);
   return offset;
+}
+
+/**
+ * Validates function calls, checking against built-ins
+ */
+function validateFunctions(tree: Tree, text: string): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+
+  /**
+   * Extract the name from a node
+   */
+  function extractName(node: SyntaxNode): string {
+    return text.substring(node.from, node.to);
+  }
+
+  /**
+   * Check if a name is a built-in function
+   */
+  function isBuiltIn(name: string): boolean {
+    return getBuiltInFunction(name) !== undefined;
+  }
+
+  // Validate function invocations
+  tree.cursor().iterate((nodeRef) => {
+    const node = nodeRef.node;
+    const nodeType = node.type.name;
+
+    if (nodeType === 'FunctionInvocation') {
+      // Check function calls
+      // Function name is typically the first child or can be extracted from the node range
+      let funcNameNode = node.firstChild;
+
+      // Skip whitespace/comments, get the actual name
+      while (funcNameNode && (funcNameNode.type.name === 'Whitespace' || funcNameNode.type.name === 'Comment')) {
+        funcNameNode = funcNameNode.nextSibling;
+      }
+
+      if (funcNameNode) {
+        // The function name might be a QualifiedName or just a Name
+        let funcName: string;
+
+        if (funcNameNode.type.name === 'QualifiedName') {
+          // For qualified names, get the full text
+          funcName = extractName(funcNameNode);
+        } else {
+          // For simple names, just extract
+          funcName = extractName(funcNameNode);
+        }
+
+        // Check if it's a built-in function
+        if (!isBuiltIn(funcName)) {
+          diagnostics.push({
+            range: {
+              start: offsetToPosition(text, funcNameNode.from),
+              end: offsetToPosition(text, funcNameNode.to),
+            },
+            severity: DiagnosticSeverity.Warning,
+            message: `Unknown function: '${funcName}'`,
+            source: 'feel-semantic',
+          });
+        }
+      }
+    }
+  });
+
+  return diagnostics;
 }
