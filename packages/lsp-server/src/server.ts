@@ -28,8 +28,8 @@ interface ServerSettings {
 /**
  * Semantic token types and modifiers
  */
-const tokenTypes = ['keyword', 'function', 'number', 'string', 'comment', 'operator'];
-const tokenModifiers: string[] = [];
+const tokenTypes = ['keyword', 'function', 'method', 'parameter', 'variable', 'number', 'string', 'comment', 'operator'];
+const tokenModifiers = ['declaration', 'defaultLibrary', 'readonly'];
 
 const tokenLegend: SemanticTokensLegend = {
   tokenTypes,
@@ -284,12 +284,13 @@ export function createServer(): Connection {
       builder.push(pos.line, pos.character, match[0].length, tokenTypes.indexOf('keyword'), 0);
     }
 
-    // Built-in functions
+    // Built-in functions - mark with defaultLibrary modifier for visual distinction
     const builtInNames = getBuiltInFunctionNames();
     const functionPattern = new RegExp(`\\b(${builtInNames.map(escapeRegex).join('|')})\\b`, 'g');
     while ((match = functionPattern.exec(text)) !== null) {
       const pos = document.positionAt(match.index);
-      builder.push(pos.line, pos.character, match[0].length, tokenTypes.indexOf('function'), 0);
+      const modifiers = 1 << tokenModifiers.indexOf('defaultLibrary'); // Set defaultLibrary bit flag
+      builder.push(pos.line, pos.character, match[0].length, tokenTypes.indexOf('function'), modifiers);
     }
 
     // Numbers
