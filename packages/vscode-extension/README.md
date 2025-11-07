@@ -100,14 +100,61 @@ Configure the extension in VS Code settings:
 packages/vscode-extension/
 ├── src/
 │   └── extension.ts              # Extension entry point (spawns LSP server)
+├── scripts/
+│   └── bundle-server.js          # Bundles LSP server into extension
+├── dist/                         # 🎁 Fully bundled - ready to package!
+│   ├── extension.cjs             # Extension + vscode-languageclient (775 KB)
+│   └── server/                   # Bundled LSP server (self-sufficient)
+│       ├── cli.js                # LSP server + @feel/core (221 KB)
+│       ├── cli.js.map
+│       ├── node_modules/         # Only LSP protocol libs (1.6 MB)
+│       └── package.json          # Minimal deps
+├── .vscode/
+│   ├── launch.json               # F5 debugging configuration
+│   └── tasks.json                # Build tasks
 ├── language-configuration.json   # Brackets, comments, indentation
 ├── package.json                  # Extension manifest
+├── tsup.config.ts                # Bundles vscode-languageclient
 └── README.md
 ```
 
 **All intelligence** comes from `@feel/lsp-server` which uses:
 - `lezer-feel` parser with built-in highlighting
 - `@feel/core` for diagnostics and built-in function metadata
+
+### Build Process
+
+The extension is **completely self-sufficient** with zero external dependencies at runtime:
+
+1. **LSP Server Build** (`pnpm build:server`):
+   - Builds `@feel/lsp-server` with tsup
+   - Bundles `@feel/core` into `cli.js` using `noExternal` config
+   - Results in a single `cli.js` file (~221 KB) with all workspace dependencies
+
+2. **Extension Build** (`pnpm build:extension`):
+   - Compiles `extension.ts` to `extension.cjs` with tsup
+   - **Bundles `vscode-languageclient`** into the extension (~775 KB total)
+   - Only `vscode` API remains external (provided by VS Code)
+
+3. **Server Bundling** (`pnpm bundle:server`):
+   - Copies bundled `cli.js` to `dist/server/`
+   - Creates minimal `package.json` with only LSP protocol dependencies:
+     - `vscode-languageserver`
+     - `vscode-languageserver-textdocument`
+   - Runs `npm install` to fetch these dependencies (~1.6 MB)
+
+**Result**: The entire extension package contains:
+- `extension.cjs` (775 KB) - Extension code + LSP client (bundled)
+- `server/cli.js` (221 KB) - LSP server + FEEL core (bundled)
+- `server/node_modules/` (1.6 MB) - LSP protocol libraries only
+
+**Total size**: ~2.6 MB with zero workspace dependencies!
+
+This approach ensures the extension can be packaged and distributed without requiring:
+- The monorepo structure
+- Workspace dependency resolution
+- Any `node_modules` installation by users
+- Any additional build steps
 
 ## Development
 

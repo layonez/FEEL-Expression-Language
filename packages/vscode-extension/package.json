@@ -3,9 +3,10 @@
   "displayName": "FEEL Language Support",
   "description": "Language support for FEEL (Friendly Enough Expression Language)",
   "version": "0.0.1",
+  "type": "module",
   "publisher": "feel",
   "engines": {
-    "vscode": "^1.80.0"
+    "vscode": "^1.0.0"
   },
   "categories": [
     "Programming Languages"
@@ -15,10 +16,7 @@
     "dmn",
     "decision"
   ],
-  "main": "./dist/extension.js",
-  "activationEvents": [
-    "onLanguage:feel"
-  ],
+  "main": "./dist/extension.cjs",
   "contributes": {
     "languages": [
       {
@@ -64,7 +62,7 @@
     "build": "pnpm run build:server && pnpm run build:extension && pnpm run bundle:server",
     "build:server": "cd ../lsp-server && pnpm build",
     "build:extension": "tsup",
-    "bundle:server": "mkdir -p dist/server && cp -r ../lsp-server/dist/* dist/server/ && cp ../lsp-server/package.json dist/server/ && cd dist/server && npm install --omit=dev --no-package-lock",
+    "bundle:server": "node scripts/bundle-server.js",
     "dev": "tsup --watch",
     "clean": "rm -rf dist *.tsbuildinfo",
     "vscode:prepublish": "pnpm build",

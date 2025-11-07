@@ -5,5 +5,6 @@
            return
              { ingredients: [ fruit, vegetable ] },
  substr: substring("hello world", 0, 5),
- division: 10 / 2
+ division: 10 / 2,
+ x: fds(2)
 }

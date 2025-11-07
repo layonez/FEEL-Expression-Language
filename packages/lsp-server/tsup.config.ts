@@ -21,5 +21,7 @@ export default defineConfig([
     banner: {
       js: '#!/usr/bin/env node',
     },
+    // Bundle all dependencies for standalone CLI usage (needed for VS Code extension)
+    noExternal: [/@feel\/.*/],
   },
 ]);

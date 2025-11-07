@@ -1,16 +1,12 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as fs from 'fs';
 import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
   TransportKind,
 } from 'vscode-languageclient/node';
-import { createServer } from '@feel/lsp-server';
-
-
-// If no server path configured, use the bundled server
-import fs from 'fs';
 
 let client: LanguageClient | undefined;
 
