@@ -31,6 +31,27 @@
         "configuration": "./language-configuration.json"
       }
     ],
+    "configurationDefaults": {
+      "[feel]": {
+        "editor.semanticHighlighting.enabled": true
+      }
+    },
+    "semanticTokenScopes": [
+      {
+        "scopes": {
+          "keyword": ["keyword.control"],
+          "function": ["entity.name.function"],
+          "function.defaultLibrary": ["support.function"],
+          "method": ["entity.name.function"],
+          "parameter": ["variable.parameter"],
+          "variable": ["variable.other"],
+          "number": ["constant.numeric"],
+          "string": ["string.quoted"],
+          "comment": ["comment.line", "comment.block"],
+          "operator": ["keyword.operator"]
+        }
+      }
+    ],
     "configuration": {
       "type": "object",
       "title": "FEEL",
@@ -58,6 +79,9 @@
       }
     }
   },
+  "activationEvents": [
+    "onLanguage:feel"
+  ],
   "scripts": {
     "build": "pnpm run build:server && pnpm run build:extension && pnpm run bundle:server",
     "build:server": "cd ../lsp-server && pnpm build",

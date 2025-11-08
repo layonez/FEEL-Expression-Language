@@ -36,5 +36,6 @@
   numberOfInfos: if resultRep.info != null then count(get entries(resultRep.info)) else 0,
   numberOfWarnings: if resultRep.should != null then count(get entries(resultRep.should)) else 0,
   numberOfMusts: if resultRep.must != null then count(get entries(resultRep.must)) else 0,
-  guidelineCheckError: numberOfMusts > 0
+  guidelineCheckError: numberOfMusts > 0,
+  f: exp(2)
 }

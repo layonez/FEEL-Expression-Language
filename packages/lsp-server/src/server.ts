@@ -77,10 +77,11 @@ export function createServer(): Connection {
     logLevel: 'debug',
   };
 
-  connection.onInitialize((_params: InitializeParams): InitializeResult => {
+  connection.onInitialize((params: InitializeParams): InitializeResult => {
     connection.console.log('FEEL LSP Server initializing...');
+    connection.console.log(`Client capabilities: ${JSON.stringify(params.capabilities.textDocument?.semanticTokens)}`);
 
-    return {
+    const result: InitializeResult = {
       capabilities: {
         textDocumentSync: TextDocumentSyncKind.Incremental,
         hoverProvider: true,
@@ -93,6 +94,9 @@ export function createServer(): Connection {
         },
       },
     };
+
+    connection.console.log(`Server semantic tokens capability: ${JSON.stringify(result.capabilities.semanticTokensProvider)}`);
+    return result;
   });
 
   connection.onInitialized(() => {
@@ -267,12 +271,15 @@ export function createServer(): Connection {
    * Semantic tokens provider - provides syntax highlighting
    */
   connection.languages.semanticTokens.on((params) => {
+    connection.console.log(`Semantic tokens requested for: ${params.textDocument.uri}`);
     const document = documents.get(params.textDocument.uri);
     if (!document) {
+      connection.console.log('Document not found!');
       return { data: [] };
     }
 
     const text = document.getText();
+    connection.console.log(`Document text length: ${text.length} characters`);
     const builder = new SemanticTokensBuilder();
 
     // Simple token detection using regex
@@ -324,7 +331,10 @@ export function createServer(): Connection {
       }
     }
 
-    return builder.build();
+    const result = builder.build();
+    connection.console.log(`Built ${result.data.length} token values (${result.data.length / 5} tokens)`);
+    connection.console.log(`First 50 values: ${result.data.slice(0, 50).join(', ')}`);
+    return result;
   });
 
   // Listen on the connection
