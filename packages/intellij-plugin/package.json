@@ -1,0 +1,23 @@
+{
+  "name": "@feel/intellij-plugin",
+  "version": "0.0.1",
+  "description": "IntelliJ IDEA plugin for FEEL language support",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm run build:server && pnpm run bundle:server && ./gradlew buildPlugin",
+    "build:server": "cd ../lsp-server && pnpm build",
+    "bundle:server": "node scripts/bundle-server.js",
+    "clean": "./gradlew clean",
+    "dev": "./gradlew runIde",
+    "verify": "./gradlew verifyPlugin"
+  },
+  "keywords": [
+    "feel",
+    "intellij",
+    "plugin",
+    "lsp"
+  ],
+  "author": "FEEL Language Team",
+  "license": "ISC"
+}

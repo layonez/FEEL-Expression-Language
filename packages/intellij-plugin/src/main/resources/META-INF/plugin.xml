@@ -1,0 +1,73 @@
+<idea-plugin>
+    <id>com.feel.language-support</id>
+    <name>FEEL Language Support</name>
+    <vendor email="support@feel.dev" url="https://github.com/layonez/FEEL-Expression-Language">FEEL Language Team</vendor>
+
+    <description><![CDATA[
+        Language support for FEEL (Friendly Enough Expression Language) powered by a Language Server Protocol implementation.
+        <br/>
+        <br/>
+        <strong>Features:</strong>
+        <ul>
+            <li>Syntax highlighting for .feel files</li>
+            <li>Real-time syntax error detection and diagnostics</li>
+            <li>Hover documentation for 80+ built-in functions</li>
+            <li>Code completion with IntelliSense for keywords and functions</li>
+            <li>Semantic token highlighting</li>
+        </ul>
+        <br/>
+        All features are powered by the FEEL Language Server via LSP integration.
+    ]]></description>
+
+    <change-notes><![CDATA[
+        <h3>0.0.1 - Initial Release</h3>
+        <ul>
+            <li>File type registration for .feel files</li>
+            <li>LSP-based syntax highlighting</li>
+            <li>Diagnostics and error detection</li>
+            <li>Hover documentation for built-in functions</li>
+            <li>Code completion support</li>
+        </ul>
+    ]]></change-notes>
+
+    <!-- Product and plugin compatibility requirements -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.redhat.devtools.lsp4ij</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- File Type -->
+        <fileType
+            name="FEEL"
+            implementationClass="com.feel.plugin.FeelFileType"
+            fieldName="INSTANCE"
+            language="FEEL"
+            extensions="feel"/>
+
+        <!-- Language -->
+        <lang.parserDefinition
+            language="FEEL"
+            implementationClass="com.feel.plugin.FeelParserDefinition"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">
+        <!-- LSP Server Definition -->
+        <server id="feelLanguageServer"
+                name="FEEL Language Server"
+                factoryClass="com.feel.plugin.lsp.FeelLspServerSupportProvider">
+            <description><![CDATA[
+            FEEL (Friendly Enough Expression Language) Language Server providing
+            diagnostics, hover documentation, and code completion.
+            ]]></description>
+        </server>
+
+        <!-- Language Mapping -->
+        <languageMapping language="FEEL"
+                        serverId="feelLanguageServer"/>
+    </extensions>
+
+    <applicationListeners>
+        <listener
+            class="com.feel.plugin.lsp.FeelLspServerLifecycleListener"
+            topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    </applicationListeners>
+</idea-plugin>

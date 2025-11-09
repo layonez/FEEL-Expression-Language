@@ -14,7 +14,13 @@ import {
   SemanticTokensLegend,
 } from 'vscode-languageserver/node.js';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { parse, getBuiltInFunction, getBuiltInFunctionNames } from '@feel/core';
+import {
+  parse,
+  getBuiltInFunction,
+  getBuiltInFunctionNames,
+  type Diagnostic,
+  type BuiltInParameter
+} from '@feel/core';
 
 /**
  * Server configuration
@@ -143,7 +149,7 @@ export function createServer(): Connection {
     const result = parse(text);
 
     // Convert our diagnostics to LSP diagnostics
-    const diagnostics = result.diagnostics.map((diag) => ({
+    const diagnostics = result.diagnostics.map((diag: Diagnostic) => ({
       severity: diag.severity,
       range: {
         start: {
@@ -201,7 +207,7 @@ export function createServer(): Connection {
 
       if (builtIn.parameters.length > 0) {
         contents.push('', '**Parameters:**');
-        builtIn.parameters.forEach((param) => {
+        builtIn.parameters.forEach((param: BuiltInParameter) => {
           const optional = param.optional ? ' (optional)' : '';
           contents.push(
             `- \`${param.name}\`: ${param.type}${optional}${param.description ? ' - ' + param.description : ''}`
@@ -241,7 +247,7 @@ export function createServer(): Connection {
 
     // Add built-in function completions
     const builtInNames = getBuiltInFunctionNames();
-    builtInNames.forEach((name) => {
+    builtInNames.forEach((name: string) => {
       const fn = getBuiltInFunction(name);
       if (fn) {
         completions.push({

@@ -12,8 +12,8 @@ This is a **pnpm TypeScript monorepo** with the following packages:
 
 - **@feel/core**: Parser and validator using `lezer-feel` and `feelin`
 - **@feel/lsp-server**: Language Server Protocol implementation
-- **@feel/vscode-extension**: VS Code client (placeholder)
-- **@feel/intellij-plugin**: IntelliJ IDEA plugin (placeholder)
+- **@feel/vscode-extension**: VS Code extension
+- **@feel/intellij-plugin**: IntelliJ IDEA plugin
 
 ## Quick Start
 
@@ -54,6 +54,32 @@ The server will listen on `localhost:7345` by default.
 
 ## Testing with IntelliJ IDEA
 
+### Using the IntelliJ Plugin (Recommended)
+
+1. **Build and install the plugin:**
+   ```bash
+   pnpm build
+   cd packages/intellij-plugin
+   pnpm build
+   ```
+
+2. **Install in IntelliJ:**
+   - Go to **Settings** → **Plugins** → **⚙️** → **Install Plugin from Disk...**
+   - Select `packages/intellij-plugin/build/distributions/intellij-feel-plugin-0.0.1.zip`
+   - Restart IntelliJ IDEA
+
+3. **Test the features:**
+   - Open or create a `.feel` file (e.g., `examples/test.feel`)
+   - Verify that:
+     - Syntax highlighting works automatically
+     - Syntax errors are highlighted with diagnostics
+     - Hovering over built-in functions shows documentation (e.g., `sum`, `date`, `substring`)
+     - Code completion works with `Ctrl+Space`
+
+See [IntelliJ Plugin README](packages/intellij-plugin/README.md) for more details.
+
+### Using Manual LSP Configuration (Alternative)
+
 1. **Start the LSP server** in TCP mode:
    ```bash
    pnpm lsp:start:tcp
@@ -87,7 +113,7 @@ The server will listen on `localhost:7345` by default.
 ### IDE Clients
 
 - ✅ **VS Code Extension**: Lean wrapper (~90 LOC) that spawns LSP server
-- ⏳ **IntelliJ Plugin**: Placeholder (use manual LSP config for now)
+- ✅ **IntelliJ Plugin**: Lean Kotlin wrapper (~400 LOC) that spawns LSP server via LSP4IJ
 
 ## Testing with VS Code
 
