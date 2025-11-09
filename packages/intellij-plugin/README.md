@@ -21,9 +21,10 @@ This plugin is a **lean wrapper** around the LSP server - all intelligence comes
 ## Prerequisites
 
 - **IntelliJ IDEA** 2024.3+ (Community or Ultimate)
-- **Node.js** >= 20 (must be installed and available in PATH)
 - **JDK** 21+
-- **pnpm** >= 9 (for building from source)
+- **pnpm** >= 9 (for building from source only)
+
+**No runtime dependencies**: The plugin bundles standalone LSP server binaries - Node.js is NOT required on user machines!
 
 ## Installation
 
@@ -69,15 +70,17 @@ packages/intellij-plugin/
 │   │   ├── FeelIcons.kt             # Icon provider
 │   │   └── lsp/
 │   │       ├── FeelLspServerSupportProvider.kt       # LSP4IJ integration
-│   │       ├── FeelLspServerConnectionProvider.kt    # Server process spawner
+│   │       ├── FeelLspServerConnectionProvider.kt    # Server binary spawner
 │   │       └── FeelLspServerLifecycleListener.kt     # Lifecycle management
 │   └── resources/
 │       ├── META-INF/plugin.xml      # Plugin descriptor
 │       ├── icons/feel.svg           # File icon
-│       └── lsp-server/              # 🎁 Bundled LSP server (created by build)
-│           ├── cli.js               # LSP server + @feel/core (221 KB)
-│           ├── node_modules/        # LSP protocol libraries (1.6 MB)
-│           └── package.json         # Minimal deps
+│       └── lsp-server/              # 🎁 Bundled LSP server binaries (created by build)
+│           ├── feel-lsp-darwin-x64       # macOS Intel (64 MB)
+│           ├── feel-lsp-darwin-arm64     # macOS Apple Silicon (58 MB)
+│           ├── feel-lsp-linux-x64        # Linux x64 (100 MB)
+│           ├── feel-lsp-linux-arm64      # Linux ARM64 (94 MB)
+│           └── feel-lsp-win32-x64.exe    # Windows x64 (115 MB)
 ├── scripts/
 │   └── bundle-server.js             # Bundles LSP server into plugin
 ├── build.gradle.kts                 # Gradle build configuration
@@ -88,26 +91,27 @@ packages/intellij-plugin/
 
 ## Build Process
 
-The plugin is **completely self-sufficient** with zero external dependencies at runtime:
+The plugin is **completely self-sufficient** with zero runtime dependencies:
 
-1. **LSP Server Build** (`pnpm build:server`):
-   - Builds `@feel/lsp-server` with tsup
-   - Bundles `@feel/core` into `cli.js`
+1. **LSP Server Binary Build** (`pnpm build:binaries`):
+   - Compiles `@feel/lsp-server` into standalone executables using Bun
+   - Creates binaries for macOS (x64, ARM64), Linux (x64, ARM64), and Windows (x64)
+   - Each binary is self-contained with Bun runtime embedded
 
-2. **Server Bundling** (`pnpm bundle:server`):
-   - Copies bundled `cli.js` to `src/main/resources/lsp-server/`
-   - Creates minimal `package.json` with LSP protocol dependencies
-   - Runs `npm install` for dependencies
+2. **Binary Bundling** (`pnpm bundle:binaries`):
+   - Copies all platform binaries to `src/main/resources/lsp-server/`
+   - Sets executable permissions for Unix binaries
 
 3. **Plugin Build** (`./gradlew buildPlugin`):
    - Compiles Kotlin sources
    - Packages everything into plugin ZIP
-   - Includes bundled LSP server in resources
+   - Includes all platform binaries in resources
 
-**Result**: The plugin ZIP contains everything needed to run, including:
+**Result**: The plugin ZIP contains everything needed to run:
 - Plugin classes (Kotlin compiled)
-- Bundled LSP server (`cli.js` + node_modules)
+- Standalone LSP binaries for all platforms (~330 MB total)
 - Icon and manifest files
+- No Node.js or npm dependencies required!
 
 ## Development
 
@@ -162,43 +166,40 @@ The plugin uses **LSP4IJ** (bundled with IntelliJ Platform) to integrate with th
 3. **Server Discovery**: Automatically finds Node.js and bundled `cli.js`
 4. **Protocol**: Communicates via stdio (same as VS Code)
 
-### Node.js Detection
+### Platform Binary Selection
 
-The plugin automatically searches for Node.js in common locations:
-- System PATH
-- `/usr/local/bin/node`
-- `/usr/bin/node`
-- `/opt/homebrew/bin/node` (macOS)
-- `C:\Program Files\nodejs\node.exe` (Windows)
+The plugin automatically selects the appropriate binary based on:
+- Operating system (macOS, Linux, Windows)
+- CPU architecture (x64, ARM64)
 
-If Node.js is not found, the plugin shows an error message.
+No external runtime dependencies are required.
 
 ## Troubleshooting
 
-### Node.js not found
+### Binary not found or not executable
 
-**Error**: "Node.js not found. Please install Node.js to use FEEL language support."
+**Error**: "FEEL Language Server binary not found. Plugin may be corrupted or incompatible with your platform."
 
-**Solution**: Install Node.js 20+ and ensure it's available in your PATH:
-```bash
-node --version  # Should print v20.x.x or higher
-```
-
-### Server not found
-
-**Error**: "FEEL Language Server not found. Plugin may be corrupted."
-
-**Solution**: Rebuild the plugin:
+**Solution**: Rebuild the plugin with all binaries:
 ```bash
 cd packages/intellij-plugin
 pnpm build
 ```
 
+### Unsupported platform
+
+**Error**: "Unsupported platform: [OS]-[ARCH]"
+
+**Solution**: This occurs on unsupported platforms. Currently supported:
+- macOS (x64, ARM64)
+- Linux (x64, ARM64)
+- Windows (x64)
+
 ### No completions or diagnostics
 
 1. Check IntelliJ logs: **Help** → **Show Log in Finder/Explorer**
-2. Look for "FEEL" entries to see server startup errors
-3. Verify Node.js is working: `node --version`
+2. Look for "FEEL" entries to see server binary startup errors
+3. Verify the binary is executable: `ls -l [plugin-path]/lsp-server/`
 4. Try restarting IntelliJ
 
 ### LSP4IJ dependency missing
@@ -207,19 +208,27 @@ pnpm build
 
 **Solution**: Ensure IntelliJ 2024.3+ which includes LSP4IJ bundled plugin
 
+### Binary file permissions (Linux/macOS)
+
+If the binary doesn't execute, you may need to mark it as executable:
+```bash
+chmod +x [plugin-path]/lsp-server/feel-lsp-*
+```
+
 ## Comparison with VS Code Extension
 
 | Aspect | VS Code Extension | IntelliJ Plugin |
 |--------|------------------|-----------------|
-| **Implementation** | TypeScript (~90 LOC) | Kotlin (~400 LOC) |
+| **Implementation** | TypeScript | Kotlin (~400 LOC) |
 | **LSP Client** | vscode-languageclient | LSP4IJ (bundled) |
-| **Server Startup** | Node spawn via LanguageClient | ProcessStreamConnectionProvider |
+| **Server Startup** | Spawns platform binary | ProcessStreamConnectionProvider spawns binary |
 | **File Type** | JSON contribution | Kotlin FileType class |
-| **Bundling** | dist/server/ | resources/lsp-server/ |
+| **Bundling** | dist/bin/ (all platforms) | resources/lsp-server/ (all platforms) |
 | **Build Tool** | tsup | Gradle |
-| **Package** | VSIX (~2.6 MB) | ZIP (~3 MB) |
+| **Package** | VSIX (~330 MB, all platforms) | ZIP (~330 MB, all platforms) |
+| **Runtime Dependencies** | None (standalone binaries) | None (standalone binaries) |
 
-Both follow the same principle: **lean wrapper around bundled LSP server**.
+Both follow the same principle: **lean wrapper around platform-specific standalone binaries**.
 
 ## Publishing
 

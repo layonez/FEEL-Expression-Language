@@ -1,14 +1,33 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as os from 'os';
 import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
-  TransportKind,
+  Executable,
 } from 'vscode-languageclient/node';
 
 let client: LanguageClient | undefined;
+
+/**
+ * Get the appropriate binary name for the current platform
+ */
+function getBinaryName(): string {
+  const platform = os.platform();
+  const arch = os.arch();
+
+  if (platform === 'darwin') {
+    return arch === 'arm64' ? 'feel-lsp-darwin-arm64' : 'feel-lsp-darwin-x64';
+  } else if (platform === 'linux') {
+    return arch === 'arm64' ? 'feel-lsp-linux-arm64' : 'feel-lsp-linux-x64';
+  } else if (platform === 'win32') {
+    return 'feel-lsp-win32-x64.exe';
+  }
+
+  throw new Error(`Unsupported platform: ${platform}-${arch}`);
+}
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('FEEL extension activated');
@@ -16,45 +35,42 @@ export function activate(context: vscode.ExtensionContext) {
   // Get configuration
   const config = vscode.workspace.getConfiguration('feel');
   let serverPath = config.get<string>('server.path');
+
   if (!serverPath || serverPath.trim() === '') {
-    // Try bundled server first (for production/packaged extension)
-    const bundledServer = context.asAbsolutePath(
-      path.join('dist', 'server', 'cli.js')
+    const binaryName = getBinaryName();
+
+    // Try bundled binary first (for production/packaged extension)
+    const bundledBinary = context.asAbsolutePath(
+      path.join('dist', 'bin', binaryName)
     );
 
     // Fall back to development path (for F5 debugging in monorepo)
-    const devServer = context.asAbsolutePath(
-      path.join('..', 'lsp-server', 'dist', 'cli.js')
+    const devBinary = context.asAbsolutePath(
+      path.join('..', 'lsp-server', 'dist', 'bin', binaryName)
     );
 
-    serverPath = fs.existsSync(bundledServer) ? bundledServer : devServer;
+    serverPath = fs.existsSync(bundledBinary) ? bundledBinary : devBinary;
   }
 
   // Verify server exists
   if (!fs.existsSync(serverPath)) {
     void vscode.window.showErrorMessage(
-      `FEEL Language Server not found at: ${serverPath}. Please build the server or configure the path.`
+      `FEEL Language Server not found at: ${serverPath}. Please build the server binaries with 'pnpm build:binaries'.`
     );
     return;
   }
 
-  console.log(`Using FEEL Language Server at: ${serverPath}`);
+  console.log(`Using FEEL Language Server binary at: ${serverPath}`);
 
-  // Server options: spawn the server as stdio
+  // Server options: execute the standalone binary
+  const serverExecutable: Executable = {
+    command: serverPath,
+    args: ['--stdio'],
+  };
+
   const serverOptions: ServerOptions = {
-    run: {
-      module: serverPath,
-      transport: TransportKind.stdio,
-      args: ['--stdio'],
-    },
-    debug: {
-      module: serverPath,
-      transport: TransportKind.stdio,
-      args: ['--stdio'],
-      options: {
-        execArgv: ['--nolazy', '--inspect=6009'],
-      },
-    },
+    run: serverExecutable,
+    debug: serverExecutable,
   };
 
   // Client options: register for .feel files

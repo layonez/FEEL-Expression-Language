@@ -83,10 +83,10 @@
     "onLanguage:feel"
   ],
   "scripts": {
-    "build": "pnpm run build:server && pnpm run build:extension && pnpm run bundle:server",
-    "build:server": "cd ../lsp-server && pnpm build",
+    "build": "pnpm run build:binaries && pnpm run build:extension && pnpm run bundle:binaries",
+    "build:binaries": "cd ../lsp-server && pnpm build:binaries",
     "build:extension": "tsup",
-    "bundle:server": "node scripts/bundle-server.js",
+    "bundle:binaries": "node scripts/bundle-server.js",
     "dev": "tsup --watch",
     "clean": "rm -rf dist *.tsbuildinfo",
     "vscode:prepublish": "pnpm build",

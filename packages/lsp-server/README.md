@@ -2,25 +2,45 @@
 
 Language Server Protocol (LSP) server for FEEL (Friendly Enough Expression Language).
 
+Compiled into **standalone executables** for macOS, Linux, and Windows using Bun. No Node.js runtime required!
+
 ## Features
 
 - **Diagnostics**: Syntax error detection on file open/change/save
 - **Hover**: Show signatures and documentation for FEEL built-in functions
 - **TCP and stdio modes**: Connect via standard I/O or TCP socket
+- **Cross-platform binaries**: Self-contained executables for all major platforms
+- **Zero runtime dependencies**: Runs without Node.js installed
 
 ## Usage
 
-### Command Line
+### Running the Standalone Binary
 
 ```bash
-# Start in stdio mode (default)
-feel-lsp --stdio
+# macOS (ARM)
+./dist/bin/feel-lsp-darwin-arm64 --stdio
 
-# Start in TCP mode on port 7345
-feel-lsp --tcp :7345
+# macOS (Intel)
+./dist/bin/feel-lsp-darwin-x64 --stdio
 
-# Start in TCP mode on specific host and port
-feel-lsp --tcp 0.0.0.0:7345
+# Linux (x64)
+./dist/bin/feel-lsp-linux-x64 --stdio
+
+# Linux (ARM)
+./dist/bin/feel-lsp-linux-arm64 --stdio
+
+# Windows
+./dist/bin/feel-lsp-win32-x64.exe --stdio
+```
+
+### TCP Mode
+
+```bash
+# Start on port 7345
+./dist/bin/feel-lsp-darwin-arm64 --tcp :7345
+
+# Start on specific host and port
+./dist/bin/feel-lsp-darwin-arm64 --tcp 0.0.0.0:7345
 ```
 
 ### Programmatic
@@ -45,11 +65,32 @@ The server accepts the following settings:
 }
 ```
 
+## Building from Source
+
+### Build TypeScript (for development)
+
+```bash
+pnpm build
+```
+
+### Build Standalone Binaries
+
+```bash
+pnpm build:binaries
+```
+
+This creates executables for all platforms in `dist/bin/`:
+- `feel-lsp-darwin-x64` - macOS Intel
+- `feel-lsp-darwin-arm64` - macOS Apple Silicon
+- `feel-lsp-linux-x64` - Linux x64 (baseline glibc)
+- `feel-lsp-linux-arm64` - Linux ARM64
+- `feel-lsp-win32-x64.exe` - Windows x64
+
 ## Testing with IntelliJ IDEA
 
-1. Start the server in TCP mode:
+1. Start a server binary in TCP mode:
    ```bash
-   pnpm lsp:start:tcp
+   ./dist/bin/feel-lsp-darwin-arm64 --tcp :7345
    ```
 
 2. In IntelliJ IDEA:
@@ -59,6 +100,8 @@ The server accepts the following settings:
    - Associate with `.feel` file extension
 
 3. Open a `.feel` file and test the features
+
+**Note**: The IntelliJ plugin bundles the binaries automatically - no manual setup needed!
 
 ## Supported LSP Methods
 

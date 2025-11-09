@@ -11,16 +11,19 @@ Provide fast feedback (syntax/arity errors, built-in signatures, simple completi
 This is a **pnpm TypeScript monorepo** with the following packages:
 
 - **@feel/core**: Parser and validator using `lezer-feel` and `feelin`
-- **@feel/lsp-server**: Language Server Protocol implementation
+- **@feel/lsp-server**: Language Server Protocol implementation (compiled to standalone executables)
 - **@feel/vscode-extension**: VS Code extension
 - **@feel/intellij-plugin**: IntelliJ IDEA plugin
+
+The LSP server is compiled into **standalone executables** for each platform using Bun, eliminating the need for Node.js on user machines.
 
 ## Quick Start
 
 ### Prerequisites
 
-- Node.js >= 20
-- pnpm >= 9
+- Node.js >= 20 (for development only)
+- pnpm >= 9 (for development only)
+- **No runtime dependencies** - IDE extensions use standalone binaries
 
 ### Installation
 
@@ -34,23 +37,31 @@ pnpm build
 
 ### Running the LSP Server
 
-The MVP provides a runnable LSP server that can be tested locally with IntelliJ IDEA or other LSP-compatible editors.
+The LSP server is compiled into standalone executables. You can run them directly:
 
-#### Start server in stdio mode (default):
+#### Run the binary for your platform:
 ```bash
-pnpm lsp:start
-# or
-./packages/lsp-server/dist/cli.js --stdio
+# macOS (ARM)
+./packages/lsp-server/dist/bin/feel-lsp-darwin-arm64 --stdio
+
+# macOS (Intel)
+./packages/lsp-server/dist/bin/feel-lsp-darwin-x64 --stdio
+
+# Linux
+./packages/lsp-server/dist/bin/feel-lsp-linux-x64 --stdio
+
+# Windows
+./packages/lsp-server/dist/bin/feel-lsp-win32-x64.exe --stdio
 ```
 
-#### Start server in TCP mode (for IntelliJ):
+#### TCP mode (for manual testing):
 ```bash
-pnpm lsp:start:tcp
-# or
-./packages/lsp-server/dist/cli.js --tcp :7345
+./packages/lsp-server/dist/bin/feel-lsp-darwin-arm64 --tcp :7345
 ```
 
 The server will listen on `localhost:7345` by default.
+
+**Note**: IDE extensions bundle the appropriate binary automatically - no manual setup needed!
 
 ## Testing with IntelliJ IDEA
 
@@ -80,9 +91,9 @@ See [IntelliJ Plugin README](packages/intellij-plugin/README.md) for more detail
 
 ### Using Manual LSP Configuration (Alternative)
 
-1. **Start the LSP server** in TCP mode:
+1. **Start the LSP server binary** in TCP mode:
    ```bash
-   pnpm lsp:start:tcp
+   ./packages/lsp-server/dist/bin/feel-lsp-darwin-arm64 --tcp :7345
    ```
 
 2. **Configure IntelliJ IDEA**:
@@ -112,8 +123,8 @@ See [IntelliJ Plugin README](packages/intellij-plugin/README.md) for more detail
 
 ### IDE Clients
 
-- ✅ **VS Code Extension**: Lean wrapper (~90 LOC) that spawns LSP server
-- ✅ **IntelliJ Plugin**: Lean Kotlin wrapper (~400 LOC) that spawns LSP server via LSP4IJ
+- ✅ **VS Code Extension**: Lean wrapper that spawns platform-specific LSP binary (no Node.js needed)
+- ✅ **IntelliJ Plugin**: Lean Kotlin wrapper that spawns platform-specific LSP binary (no Node.js needed)
 
 ## Testing with VS Code
 
@@ -178,8 +189,9 @@ packages/
 - **Parser**: `lezer-feel@1.9.0` (Lezer grammar for FEEL)
 - **Interpreter**: `feelin@4.3.0+` (for built-in function metadata)
 - **LSP**: `vscode-languageserver@9.0.1`
-- **Build**: `tsup`, `pnpm workspaces`
+- **Build**: `tsup`, `pnpm workspaces`, **Bun** (for standalone executables)
 - **Language**: TypeScript, ES2022, ESM
+- **Runtime**: Bun v1.3.2+ (bundled in executables)
 
 ## Design Philosophy
 

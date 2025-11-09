@@ -1,6 +1,5 @@
 package com.feel.plugin.lsp
 
-import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.PluginId
@@ -8,11 +7,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.redhat.devtools.lsp4ij.server.ProcessStreamConnectionProvider
 import java.io.File
-import java.nio.file.Files
 
 /**
  * Connection provider that starts the FEEL LSP server process
- * Similar to VS Code extension's approach of spawning the Node.js server
+ * Uses standalone binary (no Node.js required)
  */
 class FeelLspServerConnectionProvider(project: Project) : ProcessStreamConnectionProvider() {
 
@@ -24,60 +22,45 @@ class FeelLspServerConnectionProvider(project: Project) : ProcessStreamConnectio
     }
 
     private fun createCommandLine(project: Project): List<String> {
-        // Find Node.js executable
-        val nodeExecutable = findNodeExecutable()
-            ?: throw RuntimeException("Node.js not found. Please install Node.js to use FEEL language support.")
+        // Find bundled LSP server binary
+        val serverPath = findServerBinary()
+            ?: throw RuntimeException("FEEL Language Server binary not found. Plugin may be corrupted or incompatible with your platform.")
 
-        // Find bundled LSP server
-        val serverPath = findServerPath()
-            ?: throw RuntimeException("FEEL Language Server not found. Plugin may be corrupted.")
-
-        logger.info("Starting FEEL Language Server: $nodeExecutable $serverPath --stdio")
+        logger.info("Starting FEEL Language Server: $serverPath --stdio")
 
         return listOf(
-            nodeExecutable,
             serverPath,
             "--stdio"
         )
     }
 
-    private fun findNodeExecutable(): String? {
-        // Try common Node.js locations
-        val candidates = if (SystemInfo.isWindows) {
-            listOf(
-                "node.exe",
-                "C:\\Program Files\\nodejs\\node.exe",
-                "C:\\Program Files (x86)\\nodejs\\node.exe"
-            )
-        } else {
-            listOf(
-                "node",
-                "/usr/local/bin/node",
-                "/usr/bin/node",
-                "/opt/homebrew/bin/node"
-            )
-        }
+    /**
+     * Get the appropriate binary name for the current platform
+     */
+    private fun getBinaryName(): String {
+        val arch = System.getProperty("os.arch")
 
-        // Check PATH first
-        val pathNode = candidates.firstOrNull { path ->
-            try {
-                val commandLine = GeneralCommandLine(path, "--version")
-                commandLine.createProcess().waitFor()
-                true
-            } catch (e: Exception) {
-                false
+        return when {
+            SystemInfo.isMac -> {
+                if (arch == "aarch64" || arch == "arm64") {
+                    "feel-lsp-darwin-arm64"
+                } else {
+                    "feel-lsp-darwin-x64"
+                }
             }
-        }
-
-        if (pathNode != null) return pathNode
-
-        // Check specific paths
-        return candidates.firstOrNull { path ->
-            File(path).exists() && File(path).canExecute()
+            SystemInfo.isLinux -> {
+                if (arch == "aarch64" || arch == "arm64") {
+                    "feel-lsp-linux-arm64"
+                } else {
+                    "feel-lsp-linux-x64"
+                }
+            }
+            SystemInfo.isWindows -> "feel-lsp-win32-x64.exe"
+            else -> throw RuntimeException("Unsupported platform: ${SystemInfo.OS_NAME}-$arch")
         }
     }
 
-    private fun findServerPath(): String? {
+    private fun findServerBinary(): String? {
         try {
             // Get plugin directory using PluginManager
             val pluginId = PluginId.getId("com.feel.language-support")
@@ -90,15 +73,18 @@ class FeelLspServerConnectionProvider(project: Project) : ProcessStreamConnectio
             val pluginPath = plugin.pluginPath
             logger.info("Plugin path: $pluginPath")
 
-            // Look for LSP server in plugin directory (copied by prepareSandbox task)
-            val serverPath = File(pluginPath.toFile(), "lsp-server/cli.js")
+            val binaryName = getBinaryName()
+            logger.info("Looking for binary: $binaryName")
 
-            if (serverPath.exists() && serverPath.canRead()) {
+            // Look for LSP server binary in plugin directory
+            val serverPath = File(pluginPath.toFile(), "lsp-server/$binaryName")
+
+            if (serverPath.exists() && serverPath.canExecute()) {
                 logger.info("Found FEEL Language Server at: ${serverPath.absolutePath}")
                 return serverPath.absolutePath
             }
 
-            logger.error("FEEL Language Server not found at: ${serverPath.absolutePath}")
+            logger.error("FEEL Language Server not found or not executable at: ${serverPath.absolutePath}")
             return null
         } catch (e: Exception) {
             logger.error("Failed to find FEEL Language Server", e)
