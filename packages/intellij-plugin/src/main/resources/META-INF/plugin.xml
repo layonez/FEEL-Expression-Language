@@ -47,6 +47,15 @@
         <lang.parserDefinition
             language="FEEL"
             implementationClass="com.feel.plugin.FeelParserDefinition"/>
+
+        <!-- Syntax Highlighting -->
+        <lang.syntaxHighlighterFactory
+            language="FEEL"
+            implementationClass="com.feel.plugin.FeelSyntaxHighlighterFactory"/>
+
+        <!-- Color Settings -->
+        <colorSettingsPage
+            implementation="com.feel.plugin.FeelColorSettingsPage"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">
