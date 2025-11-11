@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.feel"
-version = "0.0.2"
+version = "0.0.3"
 
 repositories {
     mavenCentral()
@@ -22,7 +22,7 @@ dependencies {
         intellijIdeaCommunity("2024.3")
 
         // LSP4IJ plugin dependency
-        plugin("com.redhat.devtools.lsp4ij:0.10.0")
+        plugin("com.redhat.devtools.lsp4ij:0.18.0")
 
         pluginVerifier()
         zipSigner()
