@@ -1,0 +1,43 @@
+// FEEL Custom Functions Test
+// This file demonstrates the custom FEEL functions available in the LSP
+
+// HTTP Call Example
+{
+  apiCall: httpCall(
+    "GET",
+    "https://api.example.com/data",
+    { Authorization: "Bearer token123", "Content-Type": "application/json" }
+  ),
+
+  // JSON Parsing Examples
+  basicParse: parseJson('{"name": "John", "age": 30}'),
+  pathExtract: parseJson('{"user": {"name": "Alice"}}', "/user/name"),
+  selectiveParse: parseJson(
+    '{"id": 1, "name": "Bob", "email": "bob@example.com"}',
+    { userId: "/id", userName: "/name" }
+  ),
+
+  // Validation and Assertions
+  validateData: validate({
+    value: 42,
+    retry: false,
+    assert: {
+      "Value must be positive": value > 0,
+      "Value must be less than 100": value < 100
+    }
+  }),
+
+  simpleAssert: assert("Number must be even", 10 mod 2 = 0),
+
+  multipleAsserts: assert({
+    "Name is not empty": string length("test") > 0,
+    "Age is valid": 25 >= 18
+  }),
+
+  // Utility Functions
+  encodedUrl: urlEncode("hello world & special chars"),
+
+  // Error Handling (these would throw)
+  // retryExample: retry("Temporary failure - retry"),
+  // failExample: fail("Critical error - do not retry")
+}

@@ -116,10 +116,11 @@ See [IntelliJ Plugin README](packages/intellij-plugin/README.md) for more detail
 ### LSP Server (Fully Implemented)
 
 - ✅ **Diagnostics**: Syntax error detection from `lezer-feel` parser
-- ✅ **Hover**: Documentation for 80+ FEEL built-in functions (73 unique names)
+- ✅ **Hover**: Documentation for 90 FEEL functions (80 DMN 1.3 built-ins + 10 custom extensions)
 - ✅ **Completion**: Keywords and built-in functions with signatures
 - ✅ **Semantic Tokens**: Syntax highlighting via LSP
 - ✅ **TCP & stdio modes**: Connect via standard I/O or TCP socket
+- ✅ **Custom Functions**: Extensible function library (httpCall, parseJson, validate, assert, etc.)
 
 ### IDE Clients
 
@@ -219,6 +220,19 @@ The `update-builtins` script automatically:
 - Validates the output compiles correctly
 
 The generated `packages/core/src/builtins.ts` file includes clear auto-generated warnings and should not be edited manually.
+
+## Custom Functions
+
+This project includes 10 custom FEEL functions that extend the standard DMN specification:
+
+- **HTTP**: `httpCall` - Execute HTTP requests
+- **JSON**: `parseJson` - Parse JSON with path extraction
+- **Validation**: `validate`, `assert`, `retry`, `fail` - Assertion framework
+- **Utilities**: `urlEncode` - URL encoding
+
+See [CUSTOM_FUNCTIONS.md](CUSTOM_FUNCTIONS.md) for complete documentation and examples.
+
+To add new custom functions, edit `packages/core/src/customs.ts` and rebuild.
 
 ## References
 

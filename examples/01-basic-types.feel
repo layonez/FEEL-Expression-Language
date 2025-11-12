@@ -1,3 +1,4 @@
+// abs in sdf sdf or 234 for ggfd else and x
 {
   modelJson: httpCall(
     method: "GET",
@@ -38,6 +39,6 @@
   numberOfMusts: if resultRep.must != null then count(get entries(resultRep.must)) else 0,
   guidelineCheckError: numberOfMusts > 0,
   ds: sum("hello world", 0, 5),
-
-  f: exp(2)
+  f: exp(2),
+  g: count([1,2,3,4,5])
 }

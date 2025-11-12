@@ -1249,22 +1249,38 @@ export const builtInFunctions: BuiltInFunction[] = [
 ];
 
 /**
+ * Import custom functions to merge with built-ins
+ */
+import { customFunctions } from './customs.js';
+
+/**
+ * All FEEL functions - combines standard built-ins with custom extensions
+ */
+export const allFunctions: BuiltInFunction[] = [
+  ...builtInFunctions,
+  ...customFunctions,
+];
+
+/**
  * Get function information by name (returns first match)
+ * Searches both built-in and custom functions
  */
 export function getBuiltInFunction(name: string): BuiltInFunction | undefined {
-  return builtInFunctions.find((fn) => fn.name === name);
+  return allFunctions.find((fn) => fn.name === name);
 }
 
 /**
  * Get all overloads for a function name
+ * Searches both built-in and custom functions
  */
 export function getBuiltInFunctionOverloads(name: string): BuiltInFunction[] {
-  return builtInFunctions.filter((fn) => fn.name === name);
+  return allFunctions.filter((fn) => fn.name === name);
 }
 
 /**
  * Get all unique function names (for completion)
+ * Includes both built-in and custom functions
  */
 export function getBuiltInFunctionNames(): string[] {
-  return Array.from(new Set(builtInFunctions.map((fn) => fn.name)));
+  return Array.from(new Set(allFunctions.map((fn) => fn.name)));
 }
